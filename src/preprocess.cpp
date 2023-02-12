@@ -140,8 +140,10 @@ void Preprocess::oust64_handler(const sensor_msgs::PointCloud2::ConstPtr &msg) {
 
 void Preprocess::l515_handler(const sensor_msgs::PointCloud2::ConstPtr &msg) {
   pl_surf.clear();
-  pcl::PointCloud<velodyne_ros::Point> pl_orig;
+  pcl::PointCloud<pcl::PointXYZINormal> pl_orig;
   pcl::fromROSMsg(*msg, pl_orig);
+  std::vector<int> tmp;
+  pcl::removeNaNFromPointCloud(pl_orig, pl_orig, tmp);
   int plsize = pl_orig.points.size();
   // pl_surf.reserve(plsize);
   for (int i = 0; i < pl_orig.size(); i++) {
