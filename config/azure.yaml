@@ -10,7 +10,7 @@ preprocess:
     calib_laser: false
 
 mapping:
-    down_sample_size: 0.1
+    down_sample_size: 0.3
     max_iteration: 3
     voxel_size: 0.25
     max_layer: 2 
@@ -26,7 +26,7 @@ noise_model:
     gyr_cov_scale: 0.2
 
 imu:
-    imu_en: true
+    imu_en: false
     extrinsic_T: [ -0.0511, 0.003, 0.0013]
     extrinsic_R: [ -0.00061492, 0.00730016, -0.999973, 
                    -0.999996, -0.00270155, 0.000595212, 

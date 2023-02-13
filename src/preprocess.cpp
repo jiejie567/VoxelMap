@@ -143,17 +143,19 @@ void Preprocess::l515_handler(const sensor_msgs::PointCloud2::ConstPtr &msg) {
   pcl::PointCloud<pcl::PointXYZINormal> pl_orig;
   pcl::fromROSMsg(*msg, pl_orig);
   std::vector<int> tmp;
-  pcl::removeNaNFromPointCloud(pl_orig, pl_orig, tmp);
   int plsize = pl_orig.points.size();
   // pl_surf.reserve(plsize);
   for (int i = 0; i < pl_orig.size(); i++) {
+      if(isnan(pl_orig.points[i].z)){
+          continue;
+      }
     PointType added_pt;
     added_pt.x = pl_orig.points[i].x;
     added_pt.y = pl_orig.points[i].y;
     added_pt.z = pl_orig.points[i].z;
     added_pt.intensity = pl_orig.points[i].intensity;
     if (i % point_filter_num == 0) {
-      pl_surf.push_back(added_pt);
+        pl_surf.push_back(added_pt);
     }
   }
 }
