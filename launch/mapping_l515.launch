@@ -1,6 +1,5 @@
 <launch>
-  <!-- Launch file for velodyne16 VLP-16 LiDAR -->
-
+    <node pkg="tf" type="static_transform_publisher" name="word2camera"  args="0 0 0 1.57 3.14 1.57 /world /camera_init 100" />
     <arg name="rviz" default="true" />
 
     <rosparam command="load" file="$(find voxel_map)/config/l515.yaml" />
