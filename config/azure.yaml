@@ -27,16 +27,17 @@ noise_model:
 
 imu:
     imu_en: false
-    extrinsic_T: [ -0.0511, 0.003, 0.0013]
+    extrinsic_T: [ -0.047, 0.0285, 0.0033]
     extrinsic_R: [ -0.00061492, 0.00730016, -0.999973, 
                    -0.999996, -0.00270155, 0.000595212, 
                    -0.00269713, 0.99997, 0.00730179]
+
 
 visualization:
     pub_voxel_map: false
     publish_max_voxel_layer: 1         # only publish 0,1 layer's plane
     pub_point_cloud: true
-    dense_map_enable: false
+    dense_map_enable: true
     pub_point_cloud_skip: 1            # publish one points per five points
 
 Result:
