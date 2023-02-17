@@ -24,7 +24,7 @@ mapping:
 noise_model:
     ranging_cov: 0.04
     angle_cov: 0.1
-    acc_cov_scale: 1.0
+    acc_cov_scale: 0.1
     gyr_cov_scale: 0.5
 
 imu:
