@@ -38,6 +38,7 @@ bool write_kitti_log = false;
 std::string result_path = "";
 // params for imu
 bool imu_en = true;
+double imu_freq = 200.0;
 std::vector<double> extrinT;
 std::vector<double> extrinR;
 
@@ -314,9 +315,12 @@ bool sync_packages(MeasureGroup &meas) {
       lidar_buffer.pop_front();
       return false;
     }
+    if(time_buffer.size()<2)
+        return false;
     meas.lidar_beg_time = time_buffer.front();
-    lidar_end_time = meas.lidar_beg_time +
-                     meas.lidar->points.back().curvature / double(1000);
+    lidar_end_time =  (meas.lidar->points.back().curvature)!=0?
+                      (meas.lidar_beg_time +meas.lidar->points.back().curvature / double(1000)):
+                      time_buffer[1];
     lidar_pushed = true;
   }
 
@@ -329,7 +333,7 @@ bool sync_packages(MeasureGroup &meas) {
   meas.imu.clear();
   while ((!imu_buffer.empty()) && (imu_time < lidar_end_time)) {
     imu_time = imu_buffer.front()->header.stamp.toSec();
-    if (imu_time > lidar_end_time + 0.02)
+    if (imu_time > lidar_end_time + 1.0/imu_freq)
       break;
     meas.imu.push_back(imu_buffer.front());
     imu_buffer.pop_front();
@@ -528,6 +532,8 @@ int main(int argc, char **argv) {
 
   // imu params, current version does not support imu
   nh.param<bool>("imu/imu_en", imu_en, false);
+  nh.param<double>("imu/imu_freq", imu_freq, 200);
+
   nh.param<vector<double>>("imu/extrinsic_T", extrinT, vector<double>());
   nh.param<vector<double>>("imu/extrinsic_R", extrinR, vector<double>());
 

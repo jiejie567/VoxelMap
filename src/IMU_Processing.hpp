@@ -213,9 +213,22 @@ void ImuProcess::UndistortPcl(const MeasureGroup &meas,
 
   /*** sort point clouds by offset time ***/
   pcl_out = *(meas.lidar);
+  for(auto & it:pcl_out){
+      V3D P_i(it.x, it.y, it.z);
+      P_i = Lid_rot_to_IMU*P_i+Lid_offset_to_IMU;
+      it.x = P_i[0];
+      it.y = P_i[1];
+      it.z = P_i[2];
+  };
+
   sort(pcl_out.points.begin(), pcl_out.points.end(), time_list);
-  const double &pcl_end_time =
-      pcl_beg_time + pcl_out.points.back().curvature / double(1000);
+  cout<<pcl_out.points.back().curvature<<endl;
+  if(pcl_out.points.back().curvature != 0)
+  {
+
+  }
+  const double &pcl_end_time = (pcl_out.points.back().curvature!=0)?
+                               (pcl_beg_time + pcl_out.points.back().curvature / double(1000)):(pcl_beg_time+0.03333);
   // cout<<"[ IMU Process ]: Process lidar from "<<pcl_beg_time<<" to "<<pcl_end_time<<", " \
   //          <<meas.imu.size()<<" imu msgs from "<<imu_beg_time<<" to "<<imu_end_time<<endl;
 
@@ -308,7 +321,6 @@ void ImuProcess::UndistortPcl(const MeasureGroup &meas,
     IMUpose.push_back(
         set_pose6d(offs_t, acc_imu, angvel_avr, vel_imu, pos_imu, R_imu));
   }
-
   /*** calculated the pos and attitude prediction at the frame-end ***/
   double note = pcl_end_time > imu_end_time ? 1.0 : -1.0;
   dt = note * (pcl_end_time - imu_end_time);

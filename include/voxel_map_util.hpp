@@ -609,7 +609,7 @@ void transformLidar(const StatesGroup &state,
   for (size_t i = 0; i < input_cloud->size(); i++) {
     pcl::PointXYZINormal p_c = input_cloud->points[i];
     Eigen::Vector3d p(p_c.x, p_c.y, p_c.z);
-    // p = p_imu->Lid_rot_to_IMU * p + p_imu->Lid_offset_to_IMU;
+//    p = p_imu->Lid_rot_to_IMU * p + p_imu->Lid_offset_to_IMU;
     p = state.rot_end * p + state.pos_end;
     pcl::PointXYZI pi;
     pi.x = p(0);

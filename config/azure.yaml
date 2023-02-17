@@ -6,7 +6,7 @@ preprocess:
     lidar_type: 3                # L515 LiDAR
     scan_line: 64
     blind: 0.01
-    point_filter_num: 10
+    point_filter_num: 5
     calib_laser: false
 
 mapping:
@@ -22,11 +22,11 @@ mapping:
 noise_model:
     ranging_cov: 0.05
     angle_cov: 0.25
-    acc_cov_scale: 0.1
-    gyr_cov_scale: 0.2
+    acc_cov_scale: 1.0
+    gyr_cov_scale: 0.5
 
 imu:
-    imu_en: false
+    imu_en: true
     extrinsic_T: [ -0.047, 0.0285, 0.0033]
     extrinsic_R: [ -0.00061492, 0.00730016, -0.999973, 
                    -0.999996, -0.00270155, 0.000595212, 
@@ -38,7 +38,7 @@ visualization:
     publish_max_voxel_layer: 1         # only publish 0,1 layer's plane
     pub_point_cloud: true
     dense_map_enable: true
-    pub_point_cloud_skip: 1            # publish one points per five points
+    pub_point_cloud_skip: 200            # publish one points per five points
 
 Result:
     write_kitti_log: false
