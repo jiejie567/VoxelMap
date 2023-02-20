@@ -292,10 +292,11 @@ void imu_cbk(const sensor_msgs::Imu::ConstPtr &msg_in) {
 
 bool sync_packages(MeasureGroup &meas) {
   if (!imu_en) {
-    if (!lidar_buffer.empty()) {
+    if (lidar_buffer.size()>2) {
       // cout<<"meas.lidar->points.size(): "<<meas.lidar->points.size()<<endl;
       meas.lidar = lidar_buffer.front();
       meas.lidar_beg_time = time_buffer.front();
+      meas.lidar_sec_time = time_buffer[1];
       time_buffer.pop_front();
       lidar_buffer.pop_front();
       return true;
@@ -318,6 +319,7 @@ bool sync_packages(MeasureGroup &meas) {
     if(time_buffer.size()<2)
         return false;
     meas.lidar_beg_time = time_buffer.front();
+    meas.lidar_sec_time = time_buffer[1];
     lidar_end_time =  (meas.lidar->points.back().curvature)!=0?
                       (meas.lidar_beg_time +meas.lidar->points.back().curvature / double(1000)):
                       time_buffer[1];

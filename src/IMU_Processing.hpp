@@ -228,7 +228,7 @@ void ImuProcess::UndistortPcl(const MeasureGroup &meas,
 
   }
   const double &pcl_end_time = (pcl_out.points.back().curvature!=0)?
-                               (pcl_beg_time + pcl_out.points.back().curvature / double(1000)):(pcl_beg_time+0.03333);
+                               (pcl_beg_time + pcl_out.points.back().curvature / double(1000)):meas.lidar_sec_time;
   // cout<<"[ IMU Process ]: Process lidar from "<<pcl_beg_time<<" to "<<pcl_end_time<<", " \
   //          <<meas.imu.size()<<" imu msgs from "<<imu_beg_time<<" to "<<imu_end_time<<endl;
 
