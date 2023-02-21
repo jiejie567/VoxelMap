@@ -37,7 +37,9 @@ using namespace Eigen;
 
 typedef voxel_map::Pose6D Pose6D;
 typedef pcl::PointXYZINormal PointType;
+typedef pcl::PointXYZRGB PointTypeRGB;
 typedef pcl::PointCloud<PointType> PointCloudXYZI;
+typedef pcl::PointCloud<PointTypeRGB> PointCloudXYZRGB;
 typedef vector<PointType, Eigen::aligned_allocator<PointType>> PointVector;
 typedef Vector3d V3D;
 typedef Matrix3d M3D;
@@ -57,10 +59,10 @@ Vector3d Lidar_offset_to_IMU(0, 0, 0);
 
 struct MeasureGroup // Lidar data and imu dates for the curent process
 {
-  MeasureGroup() { this->lidar.reset(new PointCloudXYZI()); };
+  MeasureGroup() { this->lidar.reset(new PointCloudXYZRGB()); };
   double lidar_beg_time;
   double lidar_sec_time;
-  PointCloudXYZI::Ptr lidar;
+  PointCloudXYZRGB::Ptr lidar;
   deque<sensor_msgs::Imu::ConstPtr> imu;
 };
 

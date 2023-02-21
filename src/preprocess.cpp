@@ -4,14 +4,12 @@
 #define RETURN0AND1 0x10
 
 Preprocess::Preprocess()
-    : feature_enabled(0), lidar_type(tofRGBD), blind(0.01), point_filter_num(1) {
-  given_offset_time = false;
+    : lidar_type(tofRGBD), blind(0.01), point_filter_num(1) {
 }
 
 Preprocess::~Preprocess() {}
 
 void Preprocess::set(bool feat_en, int lid_type, double bld, int pfilt_num) {
-  feature_enabled = feat_en;
   lidar_type = lid_type;
   blind = bld;
   point_filter_num = pfilt_num;
@@ -19,7 +17,7 @@ void Preprocess::set(bool feat_en, int lid_type, double bld, int pfilt_num) {
 
 
 void Preprocess::process(const sensor_msgs::PointCloud2::ConstPtr &msg,
-                         PointCloudXYZI::Ptr &pcl_out) {
+                         PointCloudXYZRGB::Ptr &pcl_out) {
   switch (lidar_type) {
   case tofRGBD:
     tofRGBD_handler(msg);
@@ -34,7 +32,7 @@ void Preprocess::process(const sensor_msgs::PointCloud2::ConstPtr &msg,
 
 void Preprocess::tofRGBD_handler(const sensor_msgs::PointCloud2::ConstPtr &msg) {
   pl_surf.clear();
-  pcl::PointCloud<PointType> pl_orig;
+  pcl::PointCloud<PointTypeRGB> pl_orig;
   pcl::fromROSMsg(*msg, pl_orig);
   int plsize = pl_orig.size();
   pl_surf.reserve(plsize);
@@ -42,10 +40,13 @@ void Preprocess::tofRGBD_handler(const sensor_msgs::PointCloud2::ConstPtr &msg) 
       if(isnan(pl_orig.points[i].z)){
           continue;
       }
-    PointType added_pt;
+    PointTypeRGB added_pt;
     added_pt.x = pl_orig.points[i].x;
     added_pt.y = pl_orig.points[i].y;
     added_pt.z = pl_orig.points[i].z;
+    added_pt.r = pl_orig.points[i].r;
+    added_pt.g = pl_orig.points[i].g;
+    added_pt.b = pl_orig.points[i].b;
 
     if (i % point_filter_num == 0) {
         pl_surf.push_back(added_pt);

@@ -9,7 +9,7 @@ using namespace std;
 typedef pcl::PointXYZINormal PointType;
 typedef pcl::PointXYZRGB PointTypeRGB;
 typedef pcl::PointCloud<PointType> PointCloudXYZI;
-typedef pcl::PointCloud<PointTypeRGB> PointCloudXYZRGBN;
+typedef pcl::PointCloud<PointTypeRGB> PointCloudXYZRGB;
 
 
 enum LID_TYPE { tofRGBD = 1};
@@ -64,17 +64,13 @@ class Preprocess
   Preprocess();
   ~Preprocess();
   
-  void process(const sensor_msgs::PointCloud2::ConstPtr &msg, PointCloudXYZI::Ptr &pcl_out);
+  void process(const sensor_msgs::PointCloud2::ConstPtr &msg, PointCloudXYZRGB::Ptr &pcl_out);
   void set(bool feat_en, int lid_type, double bld, int pfilt_num);
 
   // sensor_msgs::PointCloud2::ConstPtr pointcloud;
-  PointCloudXYZI pl_full, pl_corn, pl_surf;
-  PointCloudXYZI pl_buff[128]; //maximum 128 line lidar
+  PointCloudXYZRGB pl_surf;
   int lidar_type, point_filter_num;
   double blind;
-  bool feature_enabled, given_offset_time;
-  ros::Publisher pub_full, pub_surf, pub_corn;
-    
 
   private:
     void tofRGBD_handler(const sensor_msgs::PointCloud2::ConstPtr &msg);

@@ -100,21 +100,21 @@ double map_incremental_time, kdtree_search_time, total_time, scan_match_time,
 bool lidar_pushed, flg_reset, flg_exit = false;
 bool dense_map_en = true;
 
-deque<PointCloudXYZI::Ptr> lidar_buffer;
+deque<PointCloudXYZRGB::Ptr> lidar_buffer;
 deque<double> time_buffer;
 deque<sensor_msgs::Imu::ConstPtr> imu_buffer;
 
 // surf feature in map
 PointCloudXYZI::Ptr featsFromMap(new PointCloudXYZI());
 PointCloudXYZI::Ptr cube_points_add(new PointCloudXYZI());
-PointCloudXYZI::Ptr feats_undistort(new PointCloudXYZI());
-PointCloudXYZI::Ptr feats_down_body(new PointCloudXYZI());
+PointCloudXYZRGB::Ptr feats_undistort(new PointCloudXYZRGB());
+PointCloudXYZRGB::Ptr feats_down_body(new PointCloudXYZRGB());
 PointCloudXYZI::Ptr feats_down_world(new PointCloudXYZI());
 PointCloudXYZI::Ptr map_down_body(new PointCloudXYZI());
 PointCloudXYZI::Ptr normvec(new PointCloudXYZI(100000, 1));
 PointCloudXYZI::Ptr laserCloudOri(new PointCloudXYZI(100000, 1));
 PointCloudXYZI::Ptr laserCloudNoeffect(new PointCloudXYZI(100000, 1));
-pcl::VoxelGrid<PointType> downSizeFilterSurf;
+pcl::VoxelGrid<PointTypeRGB> downSizeFilterSurf;
 pcl::VoxelGrid<PointType> downSizeFilterMap;
 
 V3D euler_cur;
@@ -213,21 +213,16 @@ void pointBodyToWorld(const Matrix<T, 3, 1> &pi, Matrix<T, 3, 1> &po) {
   po[2] = p_global(2);
 }
 
-void RGBpointBodyToWorld(PointType const *const pi, PointType *const po) {
+void RGBpointBodyToWorld(PointTypeRGB const *const pi, PointTypeRGB *const po) {
   V3D p_body(pi->x, pi->y, pi->z);
   V3D p_global(state.rot_end * (p_body) + state.pos_end);
   po->x = p_global(0);
   po->y = p_global(1);
   po->z = p_global(2);
-  po->intensity = pi->intensity;
-  po->curvature = pi->curvature;
-  po->normal_x = pi->normal_x;
-  po->normal_y = pi->normal_y;
-  po->normal_z = pi->normal_z;
-  float intensity = pi->intensity;
-  intensity = intensity - floor(intensity);
+  po->r = pi->r;
+  po->g = pi->g;
+  po->b = pi->b;
 
-  int reflection_map = intensity * 10000;
 }
 
 void standard_pcl_cbk(const sensor_msgs::PointCloud2::ConstPtr &msg) {
@@ -238,7 +233,7 @@ void standard_pcl_cbk(const sensor_msgs::PointCloud2::ConstPtr &msg) {
     lidar_buffer.clear();
   }
   // ROS_INFO("get point cloud at time: %.6f", msg->header.stamp.toSec());
-  PointCloudXYZI::Ptr ptr(new PointCloudXYZI());
+  PointCloudXYZRGB::Ptr ptr(new PointCloudXYZRGB());
   p_pre->process(msg, ptr);
   lidar_buffer.push_back(ptr);
   time_buffer.push_back(msg->header.stamp.toSec());
@@ -301,9 +296,7 @@ bool sync_packages(MeasureGroup &meas) {
         return false;
     meas.lidar_beg_time = time_buffer.front();
     meas.lidar_sec_time = time_buffer[1];
-    lidar_end_time =  (meas.lidar->points.back().curvature)!=0?
-                      (meas.lidar_beg_time +meas.lidar->points.back().curvature / double(1000)):
-                      time_buffer[1];
+    lidar_end_time = time_buffer[1];
     lidar_pushed = true;
   }
 
@@ -330,15 +323,15 @@ bool sync_packages(MeasureGroup &meas) {
 
 void publish_frame_world(const ros::Publisher &pubLaserCloudFullRes,
                          const int point_skip) {
-  PointCloudXYZI::Ptr laserCloudFullRes(dense_map_en ? feats_undistort
+  PointCloudXYZRGB::Ptr laserCloudFullRes(dense_map_en ? feats_undistort
                                                      : feats_down_body);
   int size = laserCloudFullRes->points.size();
-  PointCloudXYZI::Ptr laserCloudWorld(new PointCloudXYZI(size, 1));
+  PointCloudXYZRGB::Ptr laserCloudWorld(new PointCloudXYZRGB(size, 1));
   for (int i = 0; i < size; i++) {
     RGBpointBodyToWorld(&laserCloudFullRes->points[i],
                         &laserCloudWorld->points[i]);
   }
-  PointCloudXYZI::Ptr laserCloudWorldPub(new PointCloudXYZI);
+  PointCloudXYZRGB::Ptr laserCloudWorldPub(new PointCloudXYZRGB);
   for (int i = 0; i < size; i += point_skip) {
     laserCloudWorldPub->points.push_back(laserCloudWorld->points[i]);
   }
@@ -421,33 +414,33 @@ void publish_no_effect(const ros::Publisher &pubLaserCloudNoEffect) {
   pubLaserCloudNoEffect.publish(laserCloudFullRes3);
 }
 
-void publish_effect(const ros::Publisher &pubLaserCloudEffect) {
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr effect_cloud_world(
-      new pcl::PointCloud<pcl::PointXYZRGB>);
-  PointCloudXYZI::Ptr laserCloudWorld(new PointCloudXYZI(effct_feat_num, 1));
-  for (int i = 0; i < effct_feat_num; i++) {
-    RGBpointBodyToWorld(&laserCloudOri->points[i], &laserCloudWorld->points[i]);
-    pcl::PointXYZRGB pi;
-    pi.x = laserCloudWorld->points[i].x;
-    pi.y = laserCloudWorld->points[i].y;
-    pi.z = laserCloudWorld->points[i].z;
-    float v = laserCloudWorld->points[i].intensity / 100;
-    v = 1.0 - v;
-    uint8_t r, g, b;
-    mapJet(v, 0, 1, r, g, b);
-    pi.r = r;
-    pi.g = g;
-    pi.b = b;
-    effect_cloud_world->points.push_back(pi);
-  }
-
-  sensor_msgs::PointCloud2 laserCloudFullRes3;
-  pcl::toROSMsg(*laserCloudWorld, laserCloudFullRes3);
-  laserCloudFullRes3.header.stamp =
-      ros::Time::now(); //.fromSec(last_timestamp_lidar);
-  laserCloudFullRes3.header.frame_id = "camera_init";
-  pubLaserCloudEffect.publish(laserCloudFullRes3);
-}
+//void publish_effect(const ros::Publisher &pubLaserCloudEffect) {
+//  pcl::PointCloud<pcl::PointXYZRGB>::Ptr effect_cloud_world(
+//      new pcl::PointCloud<pcl::PointXYZRGB>);
+//  PointCloudXYZI::Ptr laserCloudWorld(new PointCloudXYZI(effct_feat_num, 1));
+//  for (int i = 0; i < effct_feat_num; i++) {
+//    RGBpointBodyToWorld(&laserCloudOri->points[i], &laserCloudWorld->points[i]);
+//    pcl::PointXYZRGB pi;
+//    pi.x = laserCloudWorld->points[i].x;
+//    pi.y = laserCloudWorld->points[i].y;
+//    pi.z = laserCloudWorld->points[i].z;
+//    float v = laserCloudWorld->points[i].intensity / 100;
+//    v = 1.0 - v;
+//    uint8_t r, g, b;
+//    mapJet(v, 0, 1, r, g, b);
+//    pi.r = r;
+//    pi.g = g;
+//    pi.b = b;
+//    effect_cloud_world->points.push_back(pi);
+//  }
+//
+//  sensor_msgs::PointCloud2 laserCloudFullRes3;
+//  pcl::toROSMsg(*laserCloudWorld, laserCloudFullRes3);
+//  laserCloudFullRes3.header.stamp =
+//      ros::Time::now(); //.fromSec(last_timestamp_lidar);
+//  laserCloudFullRes3.header.frame_id = "camera_init";
+//  pubLaserCloudEffect.publish(laserCloudFullRes3);
+//}
 
 template <typename T> void set_posestamp(T &out) {
   out.position.x = state.pos_end(0);
@@ -657,21 +650,6 @@ int main(int argc, char **argv) {
               undistort_end - undistort_start)
               .count() *
           1000;
-      if (calib_laser) {
-        // calib the vertical angle for kitti dataset
-        for (size_t i = 0; i < feats_undistort->size(); i++) {
-          PointType pi = feats_undistort->points[i];
-          double range = sqrt(pi.x * pi.x + pi.y * pi.y + pi.z * pi.z);
-          double calib_vertical_angle = deg2rad(0.15);
-          double vertical_angle = asin(pi.z / range) + calib_vertical_angle;
-          double horizon_angle = atan2(pi.y, pi.x);
-          pi.z = range * sin(vertical_angle);
-          double project_len = range * cos(vertical_angle);
-          pi.x = project_len * cos(horizon_angle);
-          pi.y = project_len * sin(horizon_angle);
-          feats_undistort->points[i] = pi;
-        }
-      }
       state_propagat = state;
 
       if (is_first_frame) {
@@ -751,9 +729,6 @@ int main(int argc, char **argv) {
               t_downsample_end - t_downsample_start)
               .count() *
           1000;
-
-      sort(feats_down_body->points.begin(), feats_down_body->points.end(),
-           time_list);
 
       int rematch_num = 0;
       bool nearest_search_en = true;
@@ -1067,7 +1042,7 @@ int main(int argc, char **argv) {
         pubVoxelMap(voxel_map, publish_max_voxel_layer, voxel_map_pub);
       }
 
-      publish_effect(pubLaserCloudEffect);
+//      publish_effect(pubLaserCloudEffect);
 
       frame_num++;
       mean_raw_points = mean_raw_points * (frame_num - 1) / frame_num +

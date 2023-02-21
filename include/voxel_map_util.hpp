@@ -603,11 +603,11 @@ void updateVoxelMap(const std::vector<pointWithCov> &input_points,
 
 void transformLidar(const StatesGroup &state,
                     const shared_ptr<ImuProcess> &p_imu,
-                    const PointCloudXYZI::Ptr &input_cloud,
+                    const PointCloudXYZRGB::Ptr &input_cloud,
                     pcl::PointCloud<pcl::PointXYZI>::Ptr &trans_cloud) {
   trans_cloud->clear();
   for (size_t i = 0; i < input_cloud->size(); i++) {
-    pcl::PointXYZINormal p_c = input_cloud->points[i];
+    pcl::PointXYZRGB p_c = input_cloud->points[i];
     Eigen::Vector3d p(p_c.x, p_c.y, p_c.z);
 //    p = p_imu->Lid_rot_to_IMU * p + p_imu->Lid_offset_to_IMU;
     p = state.rot_end * p + state.pos_end;
@@ -615,7 +615,6 @@ void transformLidar(const StatesGroup &state,
     pi.x = p(0);
     pi.y = p(1);
     pi.z = p(2);
-    pi.intensity = p_c.intensity;
     trans_cloud->points.push_back(pi);
   }
 }
