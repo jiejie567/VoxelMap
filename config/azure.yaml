@@ -3,8 +3,7 @@ common:
     imu_topic:  "/imu"
 
 preprocess:
-    lidar_type: 3                # L515 LiDAR
-    scan_line: 64
+    lidar_type: 1                # tofRGBD LiDAR
     blind: 0.01
     point_filter_num: 5
     calib_laser: false

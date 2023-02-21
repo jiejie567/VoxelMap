@@ -65,8 +65,8 @@ Step C: Play rosbag.
 
 If want to save the trajectory result (camera pose), set the ```write_kitti_log``` to ```true``` and change the ```result_path``` to your own path.
 
-### 3.2 Run on L515 dataset
-Step A: Download our bags here: [Voxel Map L515 Datasets](https://connecthkuhk-my.sharepoint.com/:f:/g/personal/ycj1_connect_hku_hk/EgILu82us_ZHhYERmckDbIkBRwsWuVANMunOePjHtSOqTg?e=iW3izS)
+### 3.2 Run on tofRGBD dataset
+Step A: Download our bags here: [Voxel Map tofRGBD Datasets](https://connecthkuhk-my.sharepoint.com/:f:/g/personal/ycj1_connect_hku_hk/EgILu82us_ZHhYERmckDbIkBRwsWuVANMunOePjHtSOqTg?e=iW3izS)
 
 Then the same step as **3.1**
 

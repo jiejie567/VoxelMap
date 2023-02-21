@@ -8,7 +8,6 @@
 #include <fstream>
 #include <geometry_msgs/Vector3.h>
 #include <image_transport/image_transport.h>
-#include <livox_ros_driver/CustomMsg.h>
 #include <math.h>
 #include <mutex>
 #include <nav_msgs/Odometry.h>
@@ -234,24 +233,6 @@ void RGBpointBodyToWorld(PointType const *const pi, PointType *const po) {
 void standard_pcl_cbk(const sensor_msgs::PointCloud2::ConstPtr &msg) {
   mtx_buffer.lock();
   // cout<<"got feature"<<endl;
-  if (msg->header.stamp.toSec() < last_timestamp_lidar) {
-    ROS_ERROR("lidar loop back, clear buffer");
-    lidar_buffer.clear();
-  }
-  // ROS_INFO("get point cloud at time: %.6f", msg->header.stamp.toSec());
-  PointCloudXYZI::Ptr ptr(new PointCloudXYZI());
-  p_pre->process(msg, ptr);
-  lidar_buffer.push_back(ptr);
-  time_buffer.push_back(msg->header.stamp.toSec());
-  last_timestamp_lidar = msg->header.stamp.toSec();
-
-  mtx_buffer.unlock();
-  sig_buffer.notify_all();
-}
-
-void livox_pcl_cbk(const livox_ros_driver::CustomMsg::ConstPtr &msg) {
-  mtx_buffer.lock();
-  // cout << "got feature" << endl;
   if (msg->header.stamp.toSec() < last_timestamp_lidar) {
     ROS_ERROR("lidar loop back, clear buffer");
     lidar_buffer.clear();
@@ -554,8 +535,7 @@ int main(int argc, char **argv) {
   // preprocess params
   nh.param<double>("preprocess/blind", p_pre->blind, 0.01);
   nh.param<bool>("preprocess/calib_laser", calib_laser, false);
-  nh.param<int>("preprocess/lidar_type", p_pre->lidar_type, AVIA);
-  nh.param<int>("preprocess/scan_line", p_pre->N_SCANS, 16);
+  nh.param<int>("preprocess/lidar_type", p_pre->lidar_type, tofRGBD);
   nh.param<int>("preprocess/point_filter_num", p_pre->point_filter_num, 2);
 
   // visualization params
@@ -574,10 +554,7 @@ int main(int argc, char **argv) {
     layer_size.push_back(layer_point_size[i]);
   }
 
-  ros::Subscriber sub_pcl =
-      p_pre->lidar_type == AVIA
-          ? nh.subscribe(lid_topic, 200000, livox_pcl_cbk)
-          : nh.subscribe(lid_topic, 200000, standard_pcl_cbk);
+  ros::Subscriber sub_pcl = nh.subscribe(lid_topic, 200000, standard_pcl_cbk);
   ros::Subscriber sub_imu;
   if (imu_en) {
     sub_imu = nh.subscribe(imu_topic, 200000, imu_cbk);
