@@ -206,7 +206,7 @@ void Preprocess::velodyne_handler(
       {
         PointType added_pt;
         // cout<<"!!!!!!"<<i<<" "<<plsize<<endl;
-        
+
         added_pt.normal_x = 0;
         added_pt.normal_y = 0;
         added_pt.normal_z = 0;
@@ -252,6 +252,10 @@ void Preprocess::velodyne_handler(
         {
           if(added_pt.x*added_pt.x+added_pt.y*added_pt.y+added_pt.z*added_pt.z > (blind * blind))
           {
+            if(added_pt.z==0)
+              {
+                continue;
+              }
             pl_surf.points.push_back(added_pt);
           }
         }

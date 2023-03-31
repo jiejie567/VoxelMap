@@ -26,7 +26,7 @@
 
 /// *************Preconfiguration
 
-#define MAX_INI_COUNT (200)
+#define MAX_INI_COUNT (10)
 
 const bool time_list(PointType &x, PointType &y) {
   return (x.curvature < y.curvature);
@@ -84,6 +84,7 @@ private:
   V3D acc_s_last;
   double start_timestamp_;
   double time_last_scan_;
+  double last_lidar_end_time_;
   int init_iter_num = 1;
   bool b_first_frame_ = true;
   bool imu_need_init_ = true;
@@ -222,11 +223,6 @@ void ImuProcess::UndistortPcl(const MeasureGroup &meas,
   };
 
   sort(pcl_out.points.begin(), pcl_out.points.end(), time_list);
-  cout<<pcl_out.points.back().curvature<<endl;
-  if(pcl_out.points.back().curvature != 0)
-  {
-
-  }
   const double &pcl_end_time = (pcl_out.points.back().curvature!=0)?
                                (pcl_beg_time + pcl_out.points.back().curvature / double(1000)):meas.lidar_sec_time;
   // cout<<"[ IMU Process ]: Process lidar from "<<pcl_beg_time<<" to "<<pcl_end_time<<", " \
@@ -251,7 +247,7 @@ void ImuProcess::UndistortPcl(const MeasureGroup &meas,
     auto &&head = *(it_imu);
     auto &&tail = *(it_imu + 1);
 
-    if (tail->header.stamp.toSec() < pcl_beg_time)
+    if (tail->header.stamp.toSec() < last_lidar_end_time_)
       continue;
 
     angvel_avr << 0.5 * (head->angular_velocity.x + tail->angular_velocity.x),
@@ -268,10 +264,10 @@ void ImuProcess::UndistortPcl(const MeasureGroup &meas,
     // #endif
 
     angvel_avr -= state_inout.bias_g;
-    acc_avr = acc_avr * G_m_s2 / mean_acc.norm() - state_inout.bias_a;
+    acc_avr = acc_avr * G_m_s2 / mean_acc.norm();// - state_inout.bias_a;
 
-    if (head->header.stamp.toSec() < pcl_beg_time) {
-      dt = tail->header.stamp.toSec() - pcl_beg_time;
+    if (head->header.stamp.toSec() < last_lidar_end_time_) {
+      dt = tail->header.stamp.toSec() - last_lidar_end_time_;
     } else {
       dt = tail->header.stamp.toSec() - head->header.stamp.toSec();
     }
@@ -331,7 +327,7 @@ void ImuProcess::UndistortPcl(const MeasureGroup &meas,
 
   auto pos_liD_e =
       state_inout.pos_end + state_inout.rot_end * Lid_offset_to_IMU;
-
+  last_lidar_end_time_ = pcl_end_time;
   /*** undistort each lidar point (backward propagation) ***/
   auto it_pcl = pcl_out.points.end() - 1;
   for (auto it_kp = IMUpose.end() - 1; it_kp != IMUpose.begin(); it_kp--) {
