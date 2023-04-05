@@ -26,7 +26,7 @@
 
 /// *************Preconfiguration
 
-#define MAX_INI_COUNT (200)
+#define MAX_INI_COUNT (20)
 
 /// *************IMU Process and undistortion
 class ImuProcess {
