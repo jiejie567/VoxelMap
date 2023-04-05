@@ -5,7 +5,7 @@ common:
 preprocess:
     lidar_type: 1                # tofRGBD LiDAR
     blind: 0.01
-    point_filter_num: 3
+    point_filter_num: 2
     calib_laser: false
 
 mapping:
@@ -37,7 +37,7 @@ visualization:
     publish_max_voxel_layer: 1         # only publish 0,1 layer's plane
     pub_point_cloud: true
     dense_map_enable: true
-    pub_point_cloud_skip: 200            # publish one points per five points
+    pub_point_cloud_skip: 2           # publish one points per five points
 
 Result:
     write_kitti_log: false
