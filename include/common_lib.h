@@ -22,7 +22,7 @@ using namespace Eigen;
 #define CUBE_LEN (6.0)
 #define LIDAR_SP_LEN (2)
 // old init
-#define INIT_COV (0.0000001)
+#define INIT_COV (0.00001)
 #define NUM_MATCH_POINTS (5)
 #define MAX_MEAS_DIM (10000)
 

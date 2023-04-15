@@ -499,6 +499,20 @@ void publish_odometry(const ros::Publisher &pubOdomAftMapped) {
   pubOdomAftMapped.publish(odomAftMapped);
 }
 
+void publish_ba_g(const ros::Publisher &g_pub, const ros::Publisher &ba_pub) {
+    geometry_msgs::Point grav;
+    grav.x = state.gravity[0];
+    grav.y = state.gravity[1];
+    grav.z = state.gravity[2];
+    g_pub.publish(grav);
+
+    geometry_msgs::Point ba;
+    ba.x = state.bias_a[0];
+    ba.y = state.bias_a[1];
+    ba.z = state.bias_a[2];
+    ba_pub.publish(ba);
+}
+
 void publish_mavros(const ros::Publisher &mavros_pose_publisher) {
   msg_body_pose.header.stamp = ros::Time::now();
   msg_body_pose.header.frame_id = "camera_odom_frame";
@@ -592,6 +606,10 @@ int main(int argc, char **argv) {
   ros::Publisher pubPath = nh.advertise<nav_msgs::Path>("/path", 10);
   ros::Publisher voxel_map_pub =
       nh.advertise<visualization_msgs::MarkerArray>("/planes", 10000);
+  ros::Publisher ba_pub =
+      nh.advertise<geometry_msgs::Point>("/ba", 10000);
+    ros::Publisher g_pub =
+            nh.advertise<geometry_msgs::Point>("/g", 10000);
 
   path.header.stamp = ros::Time::now();
   path.header.frame_id = "camera_init";
@@ -628,8 +646,8 @@ int main(int argc, char **argv) {
 
   p_imu->set_gyr_cov_scale(V3D(gyr_cov_scale, gyr_cov_scale, gyr_cov_scale));
   p_imu->set_acc_cov_scale(V3D(acc_cov_scale, acc_cov_scale, acc_cov_scale));
-  p_imu->set_gyr_bias_cov(V3D(0.00001, 0.00001, 0.00001));
-  p_imu->set_acc_bias_cov(V3D(0.00001, 0.00001, 0.00001));
+  p_imu->set_gyr_bias_cov(V3D(0.001, 0.0001, 0.0001));
+  p_imu->set_acc_bias_cov(V3D(0.0001, 0.0001, 0.0001));
 
   G.setZero();
   H_T_H.setZero();
@@ -1072,6 +1090,8 @@ int main(int argc, char **argv) {
       /******* Publish functions:  *******/
       publish_odometry(pubOdomAftMapped);
       publish_path(pubPath);
+      publish_ba_g(g_pub,ba_pub);
+
       tf::Transform transform;
       tf::Quaternion q;
       transform.setOrigin(

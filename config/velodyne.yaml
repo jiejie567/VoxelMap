@@ -1,5 +1,5 @@
 common:
-    lid_topic:  "/velodyne_points"
+    lid_topic:  "/velodyne_points_0"
     imu_topic:  "/imu/data"
 
 preprocess:
