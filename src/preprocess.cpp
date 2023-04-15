@@ -166,7 +166,6 @@ void Preprocess::velodyne_handler(
   pl_surf.clear();
   pl_corn.clear();
   pl_full.clear();
-  int a;
   pcl::PointCloud<velodyne_ros::Point> pl_orig;
     pcl::fromROSMsg(*msg, pl_orig);
     int plsize = pl_orig.points.size();
