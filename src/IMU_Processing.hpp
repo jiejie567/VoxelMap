@@ -108,6 +108,7 @@ ImuProcess::ImuProcess()
   Lid_offset_to_IMU = Zero3d;
   Lid_rot_to_IMU = Eye3d;
   last_imu_.reset(new sensor_msgs::Imu());
+  last_lidar_end_time_ = 0.0;
 }
 
 ImuProcess::~ImuProcess() {}
