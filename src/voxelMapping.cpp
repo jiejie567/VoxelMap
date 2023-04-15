@@ -674,6 +674,11 @@ int main(int argc, char **argv) {
       //           << state.cov.block<3, 3>(0, 0) << std::endl;
       auto undistort_start = std::chrono::high_resolution_clock::now();
       p_imu->Process(Measures, state, feats_undistort);
+      if (feats_undistort->empty() || (feats_undistort == NULL))
+      {
+          ROS_WARN("No point, skip this scan!\n");
+          continue;
+      }
       auto undistort_end = std::chrono::high_resolution_clock::now();
       auto undistort_time =
           std::chrono::duration_cast<std::chrono::duration<double>>(
