@@ -34,7 +34,9 @@ void Preprocess::process(const sensor_msgs::PointCloud2::ConstPtr &msg,
   case VELO16:
     velodyne_handler(msg);
     break;
-
+  case OUSTER64:
+    oust64_handler(msg);
+    break;
   default:
     printf("Error LiDAR Type");
     break;

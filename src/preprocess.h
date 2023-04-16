@@ -10,7 +10,7 @@ using namespace std;
 typedef pcl::PointXYZINormal PointType;
 typedef pcl::PointCloud<PointType> PointCloudXYZI;
 
-enum LID_TYPE { AVIA = 1, VELO16, L515, OUSTER64 }; //{1, 2, 3}
+enum LID_TYPE { AVIA = 1, VELO16, L515, OUSTER64 }; //{1, 2, 3, 4}
 
 namespace velodyne_ros {
 struct EIGEN_ALIGN16 Point {
