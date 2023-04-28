@@ -499,7 +499,7 @@ void publish_odometry(const ros::Publisher &pubOdomAftMapped) {
   pubOdomAftMapped.publish(odomAftMapped);
 }
 
-void publish_ba_g(const ros::Publisher &g_pub, const ros::Publisher &ba_pub) {
+void publish_ba_g(const ros::Publisher &g_pub, const ros::Publisher &ba_pub, const ros::Publisher &v_pub) {
     geometry_msgs::Point grav;
     grav.x = state.gravity[0];
     grav.y = state.gravity[1];
@@ -511,6 +511,12 @@ void publish_ba_g(const ros::Publisher &g_pub, const ros::Publisher &ba_pub) {
     ba.y = state.bias_a[1];
     ba.z = state.bias_a[2];
     ba_pub.publish(ba);
+
+    geometry_msgs::Point v;
+    v.x = state.vel_end[0];
+    v.y = state.vel_end[1];
+    v.z = state.vel_end[2];
+    v_pub.publish(v);
 }
 
 void publish_mavros(const ros::Publisher &mavros_pose_publisher) {
@@ -608,10 +614,11 @@ int main(int argc, char **argv) {
       nh.advertise<visualization_msgs::MarkerArray>("/planes", 10000);
   ros::Publisher ba_pub =
       nh.advertise<geometry_msgs::Point>("/ba", 10000);
-    ros::Publisher g_pub =
-            nh.advertise<geometry_msgs::Point>("/g", 10000);
-
-  path.header.stamp = ros::Time::now();
+  ros::Publisher g_pub =
+          nh.advertise<geometry_msgs::Point>("/g", 10000);
+  ros::Publisher v_pub =
+          nh.advertise<geometry_msgs::Point>("/v", 10000);
+path.header.stamp = ros::Time::now();
   path.header.frame_id = "camera_init";
 
   /*** variables definition ***/
@@ -1094,7 +1101,7 @@ int main(int argc, char **argv) {
       /******* Publish functions:  *******/
       publish_odometry(pubOdomAftMapped);
       publish_path(pubPath);
-      publish_ba_g(g_pub,ba_pub);
+      publish_ba_g(g_pub, ba_pub, v_pub);
 
       tf::Transform transform;
       tf::Quaternion q;
