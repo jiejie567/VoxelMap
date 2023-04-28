@@ -303,7 +303,7 @@
                   "type": "repr"
                 },
                 "rviz_config_file": {
-                  "repr": "'/home/jeff/slam_repo/voxel_map_ws/src/VoxelMap/rviz_cfg/voxel_mapping.rviz'",
+                  "repr": "'/home/jeff/slam_repo/voxel_map_bias_g_ws/src/VoxelMap/rviz_cfg/voxel_mapping.rviz'",
                   "type": "repr"
                 }
               },

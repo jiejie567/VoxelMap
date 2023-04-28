@@ -6,8 +6,7 @@
 
     <node pkg="voxel_map" type="voxel_mapping_odom" name="voxel_mapping_odom" output="screen"/>
 
-    <group if="$(arg rviz)">
-    <node launch-prefix="nice" pkg="rviz" type="rviz" name="rviz" args="-d $(find voxel_map)/rviz_cfg/voxel_mapping_camera.rviz" />
-    </group>
+    <node pkg="rqt_gui" type="rqt_gui" name="rqt" args="--perspective-file $(find voxel_map)/rviz_cfg/plot.perspective" />
+    <node pkg="rosbag" type="play" name="player" args="/media/jeff/dataset/static_azure_2023-04-28-09-54-33.bag -r 1 " />
 
 </launch>

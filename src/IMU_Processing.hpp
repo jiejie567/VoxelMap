@@ -265,7 +265,7 @@ void ImuProcess::UndistortPcl(const MeasureGroup &meas,
     // #endif
 
     angvel_avr -= state_inout.bias_g;
-    acc_avr = acc_avr * G_m_s2 / mean_acc.norm();// - state_inout.bias_a;
+    acc_avr = acc_avr * G_m_s2 / mean_acc.norm() -state_inout.bias_a ;// - state_inout.bias_a;
 
     if (head->header.stamp.toSec() < last_lidar_end_time_) {
       dt = tail->header.stamp.toSec() - last_lidar_end_time_;
@@ -285,6 +285,11 @@ void ImuProcess::UndistortPcl(const MeasureGroup &meas,
     F_x.block<3, 3>(0, 9) = -Eye3d * dt;
     // F_x.block<3,3>(3,0)  = R_imu * off_vel_skew * dt;
     F_x.block<3, 3>(3, 6) = Eye3d * dt;
+
+//    F_x.block<3, 3>(3, 0) = -0.5* R_imu * acc_avr_skew * dt * dt;
+//    F_x.block<3, 3>(3, 12) = -0.5 * R_imu * dt * dt;
+//    F_x.block<3, 3>(3, 15) = 0.5* Eye3d * dt * dt;
+
     F_x.block<3, 3>(6, 0) = -R_imu * acc_avr_skew * dt;
     F_x.block<3, 3>(6, 12) = -R_imu * dt;
     F_x.block<3, 3>(6, 15) = Eye3d * dt;

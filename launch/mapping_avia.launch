@@ -9,5 +9,5 @@
     <group if="$(arg rviz)">
     <node pkg="rqt_gui" type="rqt_gui" name="rqt" args="--perspective-file $(find voxel_map)/rviz_cfg/plot.perspective" />
     </group>
-
+    <node pkg="rosbag" type="play" name="player" args="/home/jeff/Downloads/Dataset/cwt_dataset/_2023-03-03-15-32-33.bag -r 5 " />
 </launch>

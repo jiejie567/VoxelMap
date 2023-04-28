@@ -73,6 +73,7 @@ struct StatesGroup {
     this->bias_a = Zero3d;
     this->gravity = Zero3d;
     this->cov = Matrix<double, DIM_STATE, DIM_STATE>::Identity() * INIT_COV;
+    this->cov.block<3,3>(12,12) = Matrix<double, 3, 3>::Identity() * 0.01;
   };
 
   StatesGroup(const StatesGroup &b) {

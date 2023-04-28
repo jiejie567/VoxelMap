@@ -646,7 +646,7 @@ int main(int argc, char **argv) {
 
   p_imu->set_gyr_cov_scale(V3D(gyr_cov_scale, gyr_cov_scale, gyr_cov_scale));
   p_imu->set_acc_cov_scale(V3D(acc_cov_scale, acc_cov_scale, acc_cov_scale));
-  p_imu->set_gyr_bias_cov(V3D(0.001, 0.0001, 0.0001));
+  p_imu->set_gyr_bias_cov(V3D(0.001, 0.001, 0.001));
   p_imu->set_acc_bias_cov(V3D(0.0001, 0.0001, 0.0001));
 
   G.setZero();
@@ -691,6 +691,11 @@ int main(int argc, char **argv) {
       // std::cout << " init rot cov:" << std::endl
       //           << state.cov.block<3, 3>(0, 0) << std::endl;
       auto undistort_start = std::chrono::high_resolution_clock::now();
+//       state.cov.block<3,3>(0, 9).setZero();
+//       state.cov.block<3,3>(3, 6).setZero();
+//       state.cov.block<3,3>(6, 0).setZero();
+//       state.cov.block<3,3>(6, 12).setZero();
+//       state.cov.block<3,3>(6, 15).setZero();
       p_imu->Process(Measures, state, feats_undistort);
       if (feats_undistort->empty() || (feats_undistort == NULL))
       {
@@ -1004,8 +1009,7 @@ int main(int argc, char **argv) {
             EKF_stop_flg = true;
             solution.block<6, 1>(9, 0).setZero();
           }
-
-          state += solution;
+            state += solution;
 
           rot_add = solution.block<3, 1>(0, 0);
           t_add = solution.block<3, 1>(3, 0);
