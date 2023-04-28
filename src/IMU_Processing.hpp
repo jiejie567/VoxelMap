@@ -265,7 +265,7 @@ void ImuProcess::UndistortPcl(const MeasureGroup &meas,
     // #endif
 
     angvel_avr -= state_inout.bias_g;
-    acc_avr = acc_avr * G_m_s2 / mean_acc.norm();// - state_inout.bias_a;
+    acc_avr = acc_avr * G_m_s2 / mean_acc.norm()- state_inout.bias_a;
 
     if (head->header.stamp.toSec() < last_lidar_end_time_) {
       dt = tail->header.stamp.toSec() - last_lidar_end_time_;

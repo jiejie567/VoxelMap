@@ -628,7 +628,7 @@ int main(int argc, char **argv) {
 
   p_imu->set_gyr_cov_scale(V3D(gyr_cov_scale, gyr_cov_scale, gyr_cov_scale));
   p_imu->set_acc_cov_scale(V3D(acc_cov_scale, acc_cov_scale, acc_cov_scale));
-  p_imu->set_gyr_bias_cov(V3D(0.00001, 0.00001, 0.00001));
+  p_imu->set_gyr_bias_cov(V3D(0.001, 0.001, 0.001));
   p_imu->set_acc_bias_cov(V3D(0.00001, 0.00001, 0.00001));
 
   G.setZero();
