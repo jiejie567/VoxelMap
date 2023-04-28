@@ -303,11 +303,7 @@
                   "type": "repr"
                 },
                 "rviz_config_file": {
-<<<<<<< HEAD
                   "repr": "'/home/jeff/slam_repo/voxel_map_bias_g_ws/src/VoxelMap/rviz_cfg/voxel_mapping.rviz'",
-=======
-                  "repr": "'/home/jeff/slam_repo/voxel_map_eval_ws/src/VoxelMap/rviz_cfg/voxel_mapping.rviz'",
->>>>>>> 5f6b9fd7b119c920c43e5b63c3097244780e72b7
                   "type": "repr"
                 }
               },
