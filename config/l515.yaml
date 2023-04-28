@@ -37,7 +37,7 @@ visualization:
     publish_max_voxel_layer: 1         # only publish 0,1 layer's plane
     pub_point_cloud: true
     dense_map_enable: true
-    pub_point_cloud_skip: 500            # publish one points per five points
+    pub_point_cloud_skip: 100            # publish one points per five points
 
 Result:
     write_kitti_log: false
