@@ -37,7 +37,7 @@ void Preprocess::tofRGBD_handler(const sensor_msgs::PointCloud2::ConstPtr &msg) 
   int plsize = pl_orig.size();
   pl_surf.reserve(plsize);
   for (int i = 0; i < pl_orig.size(); i++) {
-      if(isnan(pl_orig.points[i].z)){
+      if(isnan(pl_orig.points[i].z)||i % point_filter_num != 0){
           continue;
       }
     PointTypeRGB added_pt;
@@ -48,11 +48,7 @@ void Preprocess::tofRGBD_handler(const sensor_msgs::PointCloud2::ConstPtr &msg) 
     added_pt.g = pl_orig.points[i].g;
     added_pt.b = pl_orig.points[i].b;
 
-    if (i % point_filter_num == 0) {
-        pl_surf.push_back(added_pt);
-    }
+    pl_surf.push_back(added_pt);
   }
 }
-
-#define MAX_LINE_NUM 64
 
