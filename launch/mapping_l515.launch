@@ -1,6 +1,7 @@
 <launch>
     <node pkg="tf" type="static_transform_publisher" name="word2camera"  args="0 0 0 1.57 3.14 1.57 /world /camera_init 100" />
     <arg name="rviz" default="true" />
+    <param name="/use_sim_time" value="true" />
 
     <rosparam command="load" file="$(find voxel_map)/config/l515.yaml" />
 
