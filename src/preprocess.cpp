@@ -30,7 +30,9 @@ void Preprocess::process(const sensor_msgs::PointCloud2::ConstPtr &msg,
   case L515:
     l515_handler(msg);
     break;
-
+  case Robosense:
+    RobosenseHandler(msg);
+    break;
   case VELO16:
     velodyne_handler(msg);
     break;
@@ -94,7 +96,63 @@ void Preprocess::avia_handler(
     }
   }
 }
+ void Preprocess::RobosenseHandler(const sensor_msgs::PointCloud2::ConstPtr &msg)
+    {
+        pl_surf.clear();
+        pl_corn.clear();
+        pl_full.clear();
 
+
+        pcl::PointCloud<robosense_ros::Point> pl_orig;
+        pcl::fromROSMsg(*msg, pl_orig);
+        int plsize = pl_orig.size();
+        pl_surf.reserve(plsize);
+
+        double headertime = msg->header.stamp.toSec();
+        //  FIXME:  时间戳大于0.1
+        auto time_list_robosense = [&](robosense_ros::Point &point_1, robosense_ros::Point &point_2)
+        {
+            return (point_1.timestamp < point_2.timestamp);
+        };
+        sort(pl_orig.points.begin(), pl_orig.points.end(), time_list_robosense);
+        while (pl_orig.points[plsize - 1].timestamp - pl_orig.points[0].timestamp >= 0.1)
+        {
+            plsize--;
+            pl_orig.points.pop_back();
+        }
+
+        double timespan_ = pl_orig.points.back().timestamp - pl_orig.points[0].timestamp;
+
+        // std::cout << timespan_ << std::endl;
+
+        // std::cout << pl_orig.points[1].timestamp - pl_orig.points[0].timestamp << ", "
+        //           << msg->header.stamp.toSec() - pl_orig.points[0].timestamp << ", "
+        //           << msg->header.stamp.toSec() - pl_orig.points.back().timestamp << std::endl;
+        for (int i = 0; i < pl_orig.points.size(); i++)
+        {
+            // if (i % point_filter_num_ != 0)
+            //     continue;
+            if (!(std::isfinite(pl_orig.points[i].x) &&
+                  std::isfinite(pl_orig.points[i].y) &&
+                  std::isfinite(pl_orig.points[i].z)))
+                continue;
+
+            double range = pl_orig.points[i].x * pl_orig.points[i].x + pl_orig.points[i].y * pl_orig.points[i].y +
+                           pl_orig.points[i].z * pl_orig.points[i].z;
+            // if (range > blind * blind)
+            //     continue;
+
+            PointType added_pt;
+            added_pt.x = pl_orig.points[i].x;
+            added_pt.y = pl_orig.points[i].y;
+            added_pt.z = pl_orig.points[i].z;
+            added_pt.intensity = pl_orig.points[i].intensity;
+            added_pt.curvature = (pl_orig.points[i].timestamp - pl_orig.points[0].timestamp)/float(1000000); // curvature unit: s
+
+
+            pl_surf.push_back(added_pt);
+        }
+    }
 void Preprocess::oust64_handler(const sensor_msgs::PointCloud2::ConstPtr &msg) {
   pl_surf.clear();
   pl_corn.clear();
